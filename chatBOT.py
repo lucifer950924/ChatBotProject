@@ -42,7 +42,7 @@ def RAGChatbot(prompt: str,retrieve):
     deep_seek_key = decN("RAGChatBot_deepseek")
 
     os.environ['OPENAI_API_KEY'] = deep_seek_key
-    os.environ['OPENAI_API_BASE'] = 'https://api.deepseek.com"'
+    os.environ['OPENAI_API_BASE'] = 'https://api.deepseek.com'
     
 
     
@@ -73,21 +73,23 @@ def RAGChatbot(prompt: str,retrieve):
 
 
 if __name__ == "__main__":
-    userPrompt = None
+    
     chunks = splitTheKnowledgeBase()
     retriever = EmbedTheChunks(chunks)
     
-    while userPrompt.lower() != 'exit':
+    while True:
         userPrompt = input("Hi! Ask me anything about Harry Potter: \n")
-    
-        response = None
-        while response == None:
-            print("Reading The Books......Wait Please.....")
-            response = RAGChatbot(userPrompt,retriever)
+        if userPrompt.lower() == 'exit':
+            break
+        else:
+            response = None
+            while response == None:
+                print("Reading The Books......Wait Please.....")
+                response = RAGChatbot(userPrompt,retriever)
         
     
-        print(response)
-        print("****Mischeif Managed*****")
-        userPrompt = 'exit'
+                print(response)
+                print("****Mischeif Managed*****")
+        
 
 
