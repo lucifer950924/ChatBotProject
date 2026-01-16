@@ -1,15 +1,29 @@
 image: python:3.10
 
 stages:
-  - test
+  - build
+  - run
 
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  TF_ENABLE_ONEDNN_OPTS: "0"
+
+cache:
+  paths:
+    - .cache/pip
+    - ~/.cache/huggingface
 
 before_script:
   - python --version
-  - pip install -r Requirements.txt
+  - pip install --upgrade pip
+  - pip install -r requirements.txt
 
-run_app:
-  stage: test
+build:
+  stage: build
+  script:
+    - python -c "import transformers, sentence_transformers; print('Deps OK')"
+
+run_chatbot:
+  stage: run
   script:
     - python chatBOT.py
-
