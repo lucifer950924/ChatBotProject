@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG Chatbot</title>
+</head>
+<body>
+    <h2>RAG Chatbot</h2>
+
+    <textarea id="question" rows="4" cols="60"></textarea><br><br>
+    <button onclick="ask()">Ask</button>
+
+    <pre id="answer"></pre>
+
+    <script>
+        async function ask() {
+            const q = document.getElementById("question").value;
+
+            const res = await fetch("http://127.0.0.1:8000/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: q })
+            });
+
+            const data = await res.json();
+            document.getElementById("answer").textContent = data.answer;
+        }
+    </script>
+</body>
+</html>

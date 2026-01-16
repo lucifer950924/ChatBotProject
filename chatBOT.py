@@ -6,6 +6,10 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.messages import HumanMessage
 from langchain_ollama import ChatOllama
+from docx import Document
+from time import time
+from pathlib import Path
+from DocToPDF import docxToPdf
 def splitTheKnowledgeBase():
     ### Declare the Current Working Directory
 
@@ -49,7 +53,7 @@ def RAGChatbot(prompt: str,retrieve):
     ##Creating LLM Model
     llm = ChatOllama(
         model="llama3:latest",
-        temperature = 0.1,
+        temperature = 0.5,
         verbose = True
         )
 
@@ -60,7 +64,7 @@ def RAGChatbot(prompt: str,retrieve):
     response = llm.invoke([
         HumanMessage(
             content = f"""
-                    I am your Harry Potter Knowledge Base. Ask me!
+                    I am your Knowledge Base. Ask me!
                     Context:  {context}
                     Question: {query}
                 """
@@ -78,7 +82,7 @@ if __name__ == "__main__":
     retriever = EmbedTheChunks(chunks)
     
     while True:
-        userPrompt = input("Hi! Ask me anything about Harry Potter: \n")
+        userPrompt = input("Hi! Ask me anything about your knowledge base: \n")
         if userPrompt.lower() == 'exit':
             break
         else:
@@ -86,9 +90,15 @@ if __name__ == "__main__":
             while response == None:
                 print("Reading The Books......Wait Please.....")
                 response = RAGChatbot(userPrompt,retriever)
-        
-    
                 print(response)
+                currDir = os.getcwd()
+                timestamp = int(time())
+                os.makedirs(os.path.join(currDir,"Output",str(timestamp)),exist_ok=True)
+                fileNames = [file.name for file in Path(os.path.join(currDir,"Database")).glob('*.pdf')]
+                doc = Document()
+                doc.add_paragraph(response)
+                doc.save(os.path.join(currDir,"Output",str(timestamp),f"{fileNames[0]}_{timestamp}.docx"))
+                docxToPdf(os.path.join(currDir,"Output",str(timestamp),f"{fileNames[0]}_{timestamp}.docx"))
                 print("****Mischeif Managed*****")
         
 
