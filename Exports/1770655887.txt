@@ -1,0 +1,35 @@
+Here is an example of how you can automate a "Who are you?" scenario using Python:
+
+```Python
+# Import necessary libraries
+import requests
+from bs4 import BeautifulSoup
+
+def who_are_you():
+    # Define the URL for the website
+    url = 'https://www.example.com/who-are-you'
+
+    # Send a GET request to the URL
+    response = requests.get(url)
+
+    # If the request is successful, parse the HTML content using BeautifulSoup
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Find the element that contains the information about who you are
+        info_element = soup.find('div', {'class': 'info'})
+
+        # Extract the text from the element
+        info_text = info_element.text.strip()
+
+        # Print the extracted text
+        print(info_text)
+
+    else:
+        print("Failed to retrieve the page")
+
+# Call the function
+who_are_you()
+```
+
+This code sends a GET request to a URL, parses the HTML content using BeautifulSoup, and extracts the information about who you are from the parsed HTML.
