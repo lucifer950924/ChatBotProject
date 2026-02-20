@@ -1,65 +1,76 @@
-import os, time , pathlib, subprocess, tracemalloc, asyncio
+import os, time , pathlib, subprocess, tracemalloc, asyncio, subprocess, csv
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama import ChatOllama, OllamaLLM
 from Utils.enCryptdeCrypt_apiKeys import decryptSecretByName
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS, Chroma
 from langchain_community.document_loaders import TextLoader
 from langchain_core.runnables import RunnablePassthrough
+# from Utils import crawlURL,readPdf
+from langchain.tools import tool
+# from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import create_agent
+os.environ['OPENAI_API_KEY'] = decryptSecretByName('RAGChatBot_deepseek')
+os.environ['OPENAI_API_BASE'] = 'https://api.deepdeek.com'
+UtilToolName = { 'crwal': 'crawlURL.py','read':'readPdf.py'}
 
-dataCollectorPath = pathlib.Path(os.path.join(os.getcwd(),'Utils'))
-for path in dataCollectorPath.iterdir():
-    if path.is_file() and path.name == 'crawlURL.py':
-        subprocess.run(['python',str(path)])
+
+def RunTool(act):
+    ''' This Function runs the programs present in Utils directory as needed.'''
+    Utildir = pathlib.Path(os.path.join(os.getcwd(),'Utils'))
+    tool = UtilToolName[act]
+    file = (str(fp) for fp in list(Utildir.iterdir()) if fp.name == tool)
+    return subprocess.run(['py','-3.10',next(file)])
 
 
-def RAG(prompt=''):
-    os.environ['OPENAI_API_KEY'] = decryptSecretByName('RAGChatBot_deepseek')
-    os.environ['OPENAI_API_BASE'] = 'https://api.deepseek.com'
-    cwd = os.getcwd()
-    databasePath = pathlib.Path(os.path.join(cwd,'Database'))
-    dataPath = [pathlib.Path(path) for path in databasePath.iterdir()]
-    datafilePath = []
+def create_RetrieverTool():
+    '''This function creates a retriever tool'''
+    database_dir = os.path.join(os.getcwd(),'Database')
+    listOfDatabases = list(map(lambda x:os.path.join(str(database_dir),str(x),f'{str(x)}.txt'),os.listdir(database_dir)))
+    chunks = []
+    splitter = CharacterTextSplitter()
+    embeddings = HuggingFaceEmbeddings(model = 'sentence-transformers/all-miniLM-L6-v2')
+    try:
+        for fp in listOfDatabases:
+            if os.path.exists(fp):
+                # Loads the documents
+                loader = TextLoader(fp,encoding='utf-8')
+                documents = loader.load()
+                chunks.extend(splitter.split_documents(documents))
+                
+        db = FAISS.from_documents(chunks,embedding=embeddings)
+        return db.as_retriever(search_kwargs = {'k':4})
+    except OSError:
+        print('Database File Doesnot exist')
 
-    for path in dataPath:
-        filepath = list(path.iterdir())[0]
-
-        if pathlib.Path(filepath).is_file() and pathlib.Path(filepath).suffix == '.txt':
-            datafilePath.append(str(filepath))
-
-    splitter = CharacterTextSplitter(chunk_size = 800, chunk_overlap = 200)
-    docs = []
-    for path in datafilePath:
-        loader = TextLoader(path)
-        document = loader.load()
-        docs.append(document)
-
-    chunks = splitter.split_documents(docs)
-    embeddings = HuggingFaceEmbeddings(model = "sentence-transformers/all-MiniLM-L6-v2")
-
-    db = FAISS.from_documents(chunks,embedding=embeddings)
-    retreiver = db.as_retriever(search_kwargs = {'k':3})
-
-    llm = ChatOllama(
-        model='llama3:latest',
-        temperature= 0.3,
-        verbose=True
+def RAG(prompt):
+    # RunTool('read')
+    retriever = create_RetrieverTool()
+    llm = OllamaLLM(
+        model = 'phi3:mini',
+        temperature = 0.3,
+        verbosity = True
     )
-    ChatTemplate = ChatPromptTemplate.from_messages(
-        [
-            ('system','You assume the role of a subject expert.'
-            'Rule:'
-            '1. Answer questions from the context only 2. If The question is out of context Answer "I Do not Know" 3. Run the Prompts 3 times and generate 3 response'),
-            ('human','Your response is as follows:')
-        ]
+    template = ChatPromptTemplate.from_messages([
+        ('system','Rules 1. You take the role of subject expert 2. Respond from the retrieved docs 3. If the context is not present say I donot know.'),
+        ('human','Context:{context}\n Question:{question}')
+    ]
     )
+    chain = ({'context': retriever,'question':RunnablePassthrough()} | template | llm)
 
-    chain = ({'context': {retreiver},'question': RunnablePassthrough()} | ChatTemplate | llm)
+    retrieved_docs = retriever.invoke(prompt)
+    context = '\n\n'.join(doc.page_content for doc in retrieved_docs)
 
-    return chain.invoke(prompt)
+    return {'question': prompt,'answer': chain.invoke(prompt),'contexts':context}
 
-print(RAG('Tell me about 5 important events in Cold War'))
+
+
+
+    
+
+
+
 
 
 
