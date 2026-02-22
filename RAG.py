@@ -80,5 +80,6 @@ class RAG:
 
 
 x = RAG()
-initial_prompt = input('Enter your prompt for the LLMs to start the conversation: ')
+# initial_prompt = input('Enter your prompt for the LLMs to start the conversation: ')
+initial_prompt = 'Will AI replace Humans?'
 x.chat_Between_LLms(initial_prompt)
