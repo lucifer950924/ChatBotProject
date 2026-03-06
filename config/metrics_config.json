@@ -1,0 +1,7 @@
+{
+  "RAGAS": { "Faithfulness": 0.8,
+            "AnswerRelevance":0.8,
+            "ContextPrecision":0.9,
+            "ContextRecall":0.91
+        }
+}
