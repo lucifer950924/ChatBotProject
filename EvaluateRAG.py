@@ -6,6 +6,8 @@ from ragas.metrics.collections import Faithfulness,AnswerRelevancy,ContextPrecis
 from groq import Groq
 from datasets import Dataset
 from Utils.enCryptdeCrypt_apiKeys import decryptSecretByName
+from langchain_ollama import OllamaLLM
+import os
 # from AskRAGAboutPdf import AskRAGaboutPdf
 def evalRAGDeepEval(func):
     def wrapper(args:str):
@@ -33,8 +35,11 @@ def evalRAGRAGAS(func):
                 'contexts': [[doc.page_content for doc in docs]]
             }
         )
-        client = Groq(api_key=decryptSecretByName('GroqAPI'))
-        evaluator = client.chat.completions.create(model = 'gemma2-9b-it')
+        os.environ['OPENAI_API_KEY']
+        
+        evaluator = OllamaLLM(model='phi3:mini',
+                              temperature = 0.1,
+                              verbose = True)
         score = evaluate(dataset=data,metrics =[Faithfulness(),AnswerRelevancy(),ContextPrecision(),ContextRecall()],llm=evaluator)
         print(score)
 
