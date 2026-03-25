@@ -35,6 +35,21 @@ class Metrics:
 
         return self.metrics
     
+    def _calculate_answer_relevance(self,question,answer):
+        question_tokens = self._tokenize_text(question)
+        answer_tokens = self._tokenize_text(answer)
+
+        q_embed = self.model.encode(question_tokens)
+        
+        
+        for ans in answer_tokens:
+            a_embed = self.model.encode(ans)
+            similarity = util.cos_sim(a_embed,q_embed)
+            score = similarity.max().item()
+
+        self.metrics['answer_relevance'] = score
+
+        return self.metrics
     
             
             
