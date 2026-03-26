@@ -25,7 +25,16 @@ class GeminiChat:
         
         
     def generateGoogleResponse(self,prompt):
-        
+        '''
+        Search for the context and returns the results and the retriever
+        This is a Retrival-Augmented-Generation Chatbot
+        Args:
+            prompt: Searches for given user prompt in the Context
+
+        Returns:
+            results : This returns a search result of the User Query in the context. if the query is not present in the context it will return I dont know
+            retriver : This returns the retriever object
+        '''
         CorpusTextDir = os.path.join(os.getcwd(),'Corpus')
         logger.info(f'Starting to Split Documents')
         # docs = list(map(lambda x:DirectoryLoader(x,glob='**/*.pdf',loader_cls=PyPDFLoader,loader_kwargs={'encoding':'utf-8'}).load_and_split(),CorpusTextDir))[0]
