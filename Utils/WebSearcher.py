@@ -1,5 +1,4 @@
 from ddgs import DDGS
-
 def searchwithDUckDuckGO(query:str) -> str:
     '''
     Search the web for up-to-date information

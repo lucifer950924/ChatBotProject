@@ -1,5 +1,9 @@
 from sentence_transformers import SentenceTransformer, util
-import nltk
+import nltk, json
+from Utils.context_generation_tool import context_generator
+
+
+
 
 class Metrics:
     def __init__(self):
@@ -11,10 +15,26 @@ class Metrics:
         except:
             nltk.download('punkt')
             nltk.download('punkt_tab')
+            
     def _tokenize_text(self,text):
         return nltk.sent_tokenize(text)
 
-    def _calculate_faithfulness(self,answer:str,context:str,threshold:float):
+
+    
+    def _calculate_faithfulness(self,answer:str,question:str,threshold:float):
+        '''
+        Calculates the faithfulness of the system
+        Args:
+            answer: Takes the AI generated answer
+            question: Takes the User question in str
+            threshold: Takes the threshold score
+
+        Returns:
+            the calculated faithfulness metrics in str
+        '''
+        
+        context = context_generator(question)
+        
         statements = self._tokenize_text(answer)
         context_chunks = self._tokenize_text(context)
         supported = 0
@@ -33,9 +53,20 @@ class Metrics:
 
         self.metrics['faithfulness'] = faithfulness
 
-        return self.metrics
+        return str(self.metrics['faithfulness'])
     
-    def _calculate_answer_relevance(self,question,answer):
+    
+    def _calculate_answer_relevance(self,answer:str,question:str):
+        '''
+        Calculates the Answer Relevance of the system
+        Args:
+            answer: Takes the AI generated answer
+            question: Takes the User question in str
+
+        Returns:
+            the calculated Answer Relevance metrics in str
+        '''
+        
         question_tokens = self._tokenize_text(question)
         answer_tokens = self._tokenize_text(answer)
 
@@ -49,7 +80,7 @@ class Metrics:
 
         self.metrics['answer_relevance'] = score
 
-        return self.metrics
+        return str(self.metrics['answer_relevance'])
     
             
             

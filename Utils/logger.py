@@ -2,6 +2,15 @@ from datetime import datetime
 import os, pathlib, logging , subprocess
 
 def setUpLogger():
+    
+    '''
+    Logs all the events happening during the execution
+    Args:
+        No Argument is needed
+    Returns:
+        logger:logger object
+        reportfp : gives the report path
+    '''
     cwd = os.getcwd()
     timestamp = datetime.now().strftime('%Y%m%d%H%S')
     exportdir = os.path.join(cwd,'Exports',f'{timestamp}')
@@ -15,7 +24,7 @@ def setUpLogger():
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
         
-        return logger,reportfp
+        return logger,exportdir
     except OSError:
         print('Make Export directory and run')
     

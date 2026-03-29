@@ -13,6 +13,8 @@ from Utils.logger import setUpLogger
 from Utils.cache_embeddings import cacheEmbeddings
 from Utils.Metrics import Metrics
 import numpy as np
+
+
 logger , fip = setUpLogger()
 class GeminiChat:
     def __init__(self):
@@ -22,18 +24,17 @@ class GeminiChat:
         self.llm = ChatOllama(model='phi3:mini',
                                           temperature = 0.3,
                                           verbose = True)
-        
-        
-    def generateGoogleResponse(self,prompt):
+           
+    def generateGoogleResponse(self,prompt:str):
         '''
         Search for the context and returns the results and the retriever
-        This is a Retrival-Augmented-Generation Chatbot
+        This is a Retrieval-Augmented-Generation Chatbot
         Args:
-            prompt: Searches for given user prompt in the Context
+            prompt: Takes the User question as argument
 
         Returns:
             results : This returns a search result of the User Query in the context. if the query is not present in the context it will return I dont know
-            retriver : This returns the retriever object
+            retriever : This returns the retriever object
         '''
         CorpusTextDir = os.path.join(os.getcwd(),'Corpus')
         logger.info(f'Starting to Split Documents')
@@ -78,12 +79,4 @@ class GeminiChat:
 
     
         
-x = GeminiChat()
-logger.info('Chat Bot is initialized')
-response ,  retriver = x.generateGoogleResponse('Who is Eragon?')
-logger.info(f'Chatbot is giving response successfully {response}')
-metrics = Metrics()
-logger.info('Metrics Calculation is starting')
-docs = retriver.invoke('Who is Eragon?')
-context = "\n".join([doc.page_content for doc in docs])
-logger.info(f'Metrics is calculated : {metrics._calculate_faithfulness(response,context,0.5)},{metrics._calculate_answer_relevance("Who is Eragon?",response)}')
+
