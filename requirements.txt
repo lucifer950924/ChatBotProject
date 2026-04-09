@@ -1,0 +1,70 @@
+# CORE AGENT FRAMEWORK
+langchain==0.0.354
+langchain-core
+langchain-community
+langchain-groq==0.0.1
+
+# LLM PROVIDERS
+groq>=0.4.0,<1.0.0
+openai==0.28.1
+google-generativeai==0.3.1
+
+# ==========================================
+# HUGGINGFACE / EMBEDDINGS
+# ==========================================
+sentence-transformers==3.4.1
+transformers==4.49.0
+tokenizers==0.21.1
+
+# DATA VALIDATION / TYPES
+pydantic==1.10.13
+typing-extensions==4.7.1
+
+# HTTP / NETWORKING
+requests==2.31.0
+httpx==0.24.1
+aiohttp==3.8.6
+urllib3==2.0.7
+tenacity==8.2.3
+
+# ==========================================
+# TOOL CALLING / AUTOMATION
+# ==========================================
+selenium==4.21.0
+playwright==1.52.0
+
+# ==========================================
+# OCR / IMAGE PROCESSING
+# ==========================================
+pytesseract==0.3.13
+Pillow==11.1.0
+opencv-python==4.11.0.86
+
+# ==========================================
+# RAG / VECTOR DATABASE
+# ==========================================
+faiss-cpu==1.12.0
+chromadb==0.6.3
+numpy==1.26.4
+pandas==2.2.3
+scikit-learn==1.6.1
+
+# ==========================================
+# DOCUMENT PROCESSING
+# ==========================================
+pypdf==5.4.0
+pymupdf==1.25.4
+python-docx==1.1.2
+
+# ==========================================
+# API / DEPLOYMENT
+# ==========================================
+fastapi==0.115.12
+uvicorn==0.34.0
+
+# ==========================================
+# UTILITIES
+# ==========================================
+python-dotenv==1.0.1
+tqdm==4.67.1
+nltk==3.9.1
