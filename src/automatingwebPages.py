@@ -33,7 +33,9 @@ tools =[
 ]
 prompt = PromptTemplate.from_template("""
 Answer the following question as best you can.
-
+Steps: Write the code -> Execute The Code -> Debug the code if there is any error -> Re-Execute the code until there is no error -> Return the final output of the code execution.
+Do not use any other URL that is not specified in the test case for automation. Always use the tools when needed and follow the steps mentioned above for each test case.
+Always use the URL present in the test case.
 You have access to the following tools:
 {tools}
 
