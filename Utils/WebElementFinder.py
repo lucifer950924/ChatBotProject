@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
-import os, asyncio
+import os, asyncio, json
+from pathlib import Path
 from Utils.RAGChatbot import readtheTestData
 
 
@@ -8,8 +9,8 @@ def gettheHTMLContent():
     This function uses Playwright to launch a headless browser
     and navigate to a specific URL to retrieve all the HTML content of the page.
 
-    Return:
-        str: The HTML content of the page.
+    Output:
+        list: A list of dictionaries where each dictionary contains details about an interactive element on the page, including its tag name, text content, id, class name, type, name, placeholder, and XPath.
     
     '''
     data = readtheTestData()
@@ -19,69 +20,52 @@ def gettheHTMLContent():
         page = browser.new_page()
         page.goto(url)
         elements = page.evaluate("""
-() => {
-    const selectors = [
-        'button',
-        'a',
-        'input',
-        'textarea',
-        'select',
-        '[role="button"]',
-        '[onclick]',
-        '[tabindex]'
-    ];
+    () => {
+        const elements = [];
 
-    const nodes = document.querySelectorAll(selectors.join(','));
+        document.querySelectorAll('input, h1, h2, h3, button, a, select, textarea').forEach(el => {
+            elements.push({
+                tag: el.tagName,
+                text: el.innerText || '',
+                id: el.id || '',
+                name: el.name || '',
+                placeholder: el.placeholder || ''
+            });
+        });
 
-    return [...nodes]
-        .filter(el => {
-            const style = window.getComputedStyle(el);
-            const rect = el.getBoundingClientRect();
-
-            return (
-                style.display !== 'none' &&
-                style.visibility !== 'hidden' &&
-                style.opacity !== '0' &&
-                !el.disabled &&
-                rect.width > 0 &&
-                rect.height > 0
-            );
-        })
-        .map(el => ({
-            tag: el.tagName,
-            text: el.innerText || el.value || '',
-            id: el.id || '',
-            className: el.className || '',
-            type: el.type || '',
-            name: el.name || '',
-            placeholder: el.placeholder || '',
-            xpath: getXPath(el)
-        }));
-
-    function getXPath(element) {
-        if (element.id)
-            return `//*[@id="${element.id}"]`;
-
-        let path = [];
-        while (element && element.nodeType === 1) {
-            let index = 1;
-            let sibling = element.previousElementSibling;
-
-            while (sibling) {
-                if (sibling.tagName === element.tagName) index++;
-                sibling = sibling.previousElementSibling;
-            }
-
-            path.unshift(`${element.tagName.toLowerCase()}[${index}]`);
-            element = element.parentElement;
-        }
-
-        return '/' + path.join('/');
+        return elements;
     }
-}
-""")
+    """)
 
         browser.close()
 
-    return elements
+    currDir = Path(__file__).parent.parent
+    DomBodypath = currDir / 'urlDOMs' 
+    DomBodypath.mkdir(exist_ok=True)
+    DomBodypath = DomBodypath / f'{data.get("URL")}'.strip('https://').strip('http://').replace('.','_')
+    DomBodypath.mkdir(exist_ok=True)
+    with open(DomBodypath / 'DomBody.json','w',encoding = 'utf-8') as file:
+        json.dump(elements,file,indent=4)
+
+    return DomBodypath / 'DomBody.json'
+
+def readtheJsonBody():
+    '''
+    This function reads the JSON file that contains the details of interactive elements on the web page and returns the data as a list of dictionaries.
+    Output:
+        Exports a .json of the DOM body of the webpage which contains details about all the interactive elements on the page, including their tag name, text content, id, class name, type, name, placeholder, and XPath. The function returns this data as a list of dictionaries where each dictionary represents an interactive element on the page.
+    Returns:
+         list: A list of dictionaries where each dictionary contains details about an interactive element on the page, including its tag name, text content, id, class name, type, name, placeholder, and XPath.
+    '''
+    file_path = gettheHTMLContent()
+    with open(file_path,'r',encoding='utf-8') as file:
+        data = json.load(file)
+
+    return data
+
+
+
+
+
+    
 
