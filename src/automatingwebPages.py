@@ -3,7 +3,7 @@ import os, csv, datetime,sys, subprocess
 from langchain_groq import ChatGroq
 from groq import Groq
 from Utils.initialize_api_key import setEnvironVariable
-from src.tools import write_automation_code_by_test_case, execute_generated_code, debug_code
+from src.tools import write_automation_code_by_test_case, execute_generated_code, debug_code, readtheTestCasesFromCSV
 from pydantic import BaseModel
 from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain.agents import create_agent
@@ -28,8 +28,8 @@ class codeRunner(BaseModel):
 tools =[
     StructuredTool.from_function(func=write_automation_code_by_test_case,name='writeAutomationCodeByTestCase',description='This function generates automation code based on the provided test case description using the Groq API. This acts as tool to generate code for the test cases which can be used in the automation of the test cases. The input to this function is a string which describes the test case for which automation code needs to be generated and the output is a string which is the file path of the generated code.',args_schema=writeCodebyTestCaseInput),
     StructuredTool.from_function(func=execute_generated_code,name='executeGeneratedCode',description='This function executes the generated code file and captures the output and any errors that occur during the execution. This acts as a tool to run the generated code and see the results of the test case automation. The input to this function is a string which is the file path of the generated code that needs to be executed and the output is a string which is the output of the executed code or the error message if an error occurs during execution.',args_schema=codeRunner),
-    StructuredTool.from_function(func=debug_code,name='debugCode',description='This function takes the file path of the generated code and the error message as input and uses the Groq API to debug the code and fix the errors. The output of this function is the file path of the corrected code after debugging.',args_schema=debugCodeInput)
-
+    StructuredTool.from_function(func=debug_code,name='debugCode',description='This function takes the file path of the generated code and the error message as input and uses the Groq API to debug the code and fix the errors. The output of this function is the file path of the corrected code after debugging.',args_schema=debugCodeInput),
+    StructuredTool.from_function(func=readtheTestCasesFromCSV,name='readTheTestCasesFromCSV',description='This function reads the test cases from a CSV file and returns a dictionary of test cases. The input to this function is the file path of the CSV file that contains the test cases and the output is a dictionary of test cases where the key is the test case name and the value is the test case description.')
 ]
 prompt = PromptTemplate.from_template("""
 Answer the following question as best you can.
@@ -64,7 +64,7 @@ Thought: {agent_scratchpad}
 # agent = create_agent(tools=tools, model=ChatGroq(model='openai/gpt-oss-120b'),system_prompt=prompt)
 
 agent = create_react_agent(tools=tools, llm=ChatGroq(model='openai/gpt-oss-120b',streaming=False),prompt=prompt)
-executor = AgentExecutor(agent=agent, tools=tools, verbose=True,handle_parsing_errors=True,max_iterations=3)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True,handle_parsing_errors=True,max_iterations=10)
 
 for test in tests.keys():
     try:

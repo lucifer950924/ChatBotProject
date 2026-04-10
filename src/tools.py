@@ -6,6 +6,9 @@ from groq import Groq
 from langchain_core.prompts import ChatPromptTemplate
 from Utils.initialize_api_key import setEnvironVariable
 from Utils.WebElementFinder import gettheHTMLContent
+from Utils.RAGChatbot import readtheTestData
+
+
 
 def write_automation_code_by_test_case(test_case:str):
     '''
@@ -98,3 +101,17 @@ def debug_code(test_case:str,code_file_path:str,result:str):
     with open(code_file_path,'w',encoding='utf-8') as file:
         file.write(corrected_code)
 
+def readtheTestCasesFromCSV():
+    '''
+    This function reads the test cases from a CSV file and returns a dictionary of test cases.
+
+    Return:
+        dict: A dictionary of test cases where the key is the test case name and the value is the test case description.
+
+    '''
+    
+    data = readtheTestData('TestCases.csv')
+
+    return data
+
+        
