@@ -70,8 +70,13 @@ Stop Iterating if all the test cases are executed successfully and there is no e
 # """
 
 # agent = create_agent(tools=tools, model=ChatGroq(model='openai/gpt-oss-120b'),system_prompt=prompt)
+try:
+    agent = create_react_agent(tools=tools, llm=ChatGroq(model='openai/gpt-oss-20b',streaming=False),prompt=prompt)
+except Exception as e:
+    print(f'Error occurred while creating the agent: {str(e)}')
+    print('Falling Back to other model')
+    agent = create_react_agent(tools=tools, llm=ChatGroq(model='openai/gpt-oss-120b',streaming=False),prompt=prompt)
 
-agent = create_react_agent(tools=tools, llm=ChatGroq(model='openai/gpt-oss-20b',streaming=False),prompt=prompt)
 executor = AgentExecutor(agent=agent, tools=tools, verbose=True,handle_parsing_errors=True,max_iterations=100)
 
 for test in tests.keys():
