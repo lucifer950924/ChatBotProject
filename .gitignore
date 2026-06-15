@@ -1,0 +1,6 @@
+Data/
+MyVENV/
+__pycache__/
+Utils/ecryptSecret.py
+Utils/enCryptdeCrypt_apiKeys.py
+requirements.txt
